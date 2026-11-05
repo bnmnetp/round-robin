@@ -1,16 +1,21 @@
 [project]
 name = "rr"
 version = "0.1.0"
-description = "Add your description here"
+description = "Round robin pickleball tournament manager"
 readme = "README.md"
 authors = [
     { name = "Bradley Miller", email = "bonelake@mac.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
-
-[project.scripts]
-rr = "rr:main"
+dependencies = [
+    "fastapi>=0.162.0",
+    "itsdangerous>=2.2.0",
+    "jinja2>=3.1.6",
+    "python-multipart>=0.0.33",
+    "segno>=1.6.6",
+    "sqlalchemy>=2.1.8",
+    "uvicorn>=0.54.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.13.7,<0.14.0"]
@@ -19,5 +24,6 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "black>=26.10.1",
+    "httpx2>=2.16.0",
     "pytest>=9.2.0",
 ]

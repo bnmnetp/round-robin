@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "macros.html" import team, highlight_picker %}
+{% block title %}Round {{ rnd.number }} · {{ t.name }}{% endblock %}
+{% block content %}
+  <p class="crumb"><a href="/t/{{ t.slug }}">← Standings</a></p>
+  <h1>Round {{ rnd.number }} <span class="of">of {{ t.num_rounds }}</span></h1>
+
+  <nav class="round-nav" aria-label="Rounds">
+    {% for r in t.rounds %}
+      <a href="/t/{{ t.slug }}/round/{{ r.number }}"
+         class="{{ 'current' if r.number == rnd.number }} {{ 'done' if r.complete }}"
+         {% if r.number == rnd.number %}aria-current="page"{% endif %}
+         aria-label="Round {{ r.number }}{{ ', done' if r.complete }}">{{ r.number }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if not editable %}{{ highlight_picker(t) }}{% endif %}
+
+  {% if editable %}
+    <p class="meta">{{ rnd.reported }} of {{ rnd.matches|length }} court{{ 's' if rnd.matches|length != 1 }} reported. Games are to {{ game_to }}; enter what the score was if time ran out.</p>
+  {% endif %}
+
+  <div class="courts">
+    {% for m in rnd.matches %}
+      {% if editable %}
+        <form class="card court {{ 'scored' if m.scored }}" id="court-{{ m.court }}" method="post" action="/t/{{ t.slug }}/match/{{ m.id }}">
+          <div class="court-head">
+            <h2>Court {{ m.court }}</h2>
+            {% if m.scored %}<span class="badge final">Reported</span>{% endif %}
+          </div>
+          {% for side, a, b, score in [('a', m.a1, m.a2, m.score_a), ('b', m.b1, m.b2, m.score_b)] %}
+            <div class="team-row">
+              {{ team(a, b) }}
+              <span class="stepper">
+                <button type="button" data-step="-1" data-target="c{{ m.court }}{{ side }}" aria-label="{{ a.name }} and {{ b.name }}: one less">−</button>
+                <input id="c{{ m.court }}{{ side }}" name="score_{{ side }}" value="{{ score if score is not none }}"
+                       inputmode="numeric" pattern="[0-9]*" maxlength="2" data-min="0" data-max="{{ game_to }}"
+                       aria-label="Score for {{ a.name }} and {{ b.name }}" autocomplete="off">
+                <button type="button" data-step="1" data-target="c{{ m.court }}{{ side }}" aria-label="{{ a.name }} and {{ b.name }}: one more">+</button>
+                <button type="button" class="eleven" data-set="{{ game_to }}" data-target="c{{ m.court }}{{ side }}" aria-label="{{ a.name }} and {{ b.name }} won: {{ game_to }}">{{ game_to }}</button>
+              </span>
+            </div>
+            {% if loop.first %}<div class="vs-line"><span>vs</span></div>{% endif %}
+          {% endfor %}
+          <button class="primary">{{ 'Update score' if m.scored else 'Save score' }}</button>
+        </form>
+      {% else %}
+        <section class="card court {{ 'scored' if m.scored }}" id="court-{{ m.court }}">
+          <div class="court-head"><h2>Court {{ m.court }}</h2></div>
+          <div class="team-row">{{ team(m.a1, m.a2) }}<span class="big-score">{{ m.score_a if m.scored else '' }}</span></div>
+          <div class="vs-line"><span>vs</span></div>
+          <div class="team-row">{{ team(m.b1, m.b2) }}<span class="big-score">{{ m.score_b if m.scored else '' }}</span></div>
+        </section>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if rnd.sitting_out %}
+    <p class="sitting">Sitting out:
+      {% for p in rnd.sitting_out %}<span data-pid="{{ p.id }}">{{ p.name }}</span>{{ ', ' if not loop.last }}{% endfor %}
+    </p>
+  {% endif %}
+
+  <div class="row spread">
+    {% if rnd.number > 1 %}<a class="button" href="/t/{{ t.slug }}/round/{{ rnd.number - 1 }}">← Round {{ rnd.number - 1 }}</a>{% else %}<span></span>{% endif %}
+    {% if rnd.number < t.num_rounds %}<a class="button" href="/t/{{ t.slug }}/round/{{ rnd.number + 1 }}">Round {{ rnd.number + 1 }} →</a>{% else %}<span></span>{% endif %}
+  </div>
+{% endblock %}

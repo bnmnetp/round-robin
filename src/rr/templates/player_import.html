@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Import players · Round Robin{% endblock %}
+{% block content %}
+  <p class="crumb"><a href="/players">← Players</a></p>
+  <h1>Import players</h1>
+
+  {% if result %}
+    <section class="card stack" aria-labelledby="result-heading">
+      <h2 id="result-heading">Imported</h2>
+      <p>
+        {{ result.added|length }} added · {{ result.updated|length }} updated ·
+        {{ result.unchanged|length }} already on the list{% if result.skipped %} · {{ result.skipped|length }} skipped{% endif %}
+      </p>
+      {% if result.added %}<p><strong>Added:</strong> {{ result.added|join(', ') }}</p>{% endif %}
+      {% if result.updated %}<p><strong>Updated:</strong> {{ result.updated|join(', ') }}</p>{% endif %}
+      {% if result.skipped %}
+        <p><strong>Skipped:</strong></p>
+        <ul class="plain">
+          {% for line, reason in result.skipped %}<li>Line {{ line }}: {{ reason }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+      <a class="button primary" href="/players">Done</a>
+    </section>
+  {% endif %}
+
+  <form method="post" action="/players/import" enctype="multipart/form-data" class="card stack">
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <p class="hint">
+      One player per line: a name and, optionally, an email. A header row like
+      <code>Name,Email</code> or <code>First Name,Last Name,Email</code> is fine.
+      Players already on the list are matched by email (or by name when there's
+      no email) and updated, not duplicated.
+    </p>
+    <label>CSV file
+      <input type="file" name="file" accept=".csv,.txt,text/csv,text/plain">
+    </label>
+    <p class="or">or paste</p>
+    <label class="visually-hidden" for="paste">Paste names</label>
+    <textarea id="paste" name="text" rows="8" placeholder="Ann Smith, ann@example.com&#10;Bob Jones, bob@example.com&#10;Cy Lee">{{ text or '' }}</textarea>
+    <button class="primary big">Import</button>
+  </form>
+{% endblock %}

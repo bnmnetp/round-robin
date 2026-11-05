@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Organizer login · Round Robin{% endblock %}
+{% block content %}
+  <h1>Organizer login</h1>
+  <form method="post" action="/login" class="card stack narrow">
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <label>Password
+      <input type="password" name="password" autocomplete="current-password" required autofocus>
+    </label>
+    <button class="primary big">Log in</button>
+  </form>
+{% endblock %}

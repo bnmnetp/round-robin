@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "macros.html" import status, team, long_date, highlight_picker %}
+{% block title %}Schedule · {{ t.name }}{% endblock %}
+{% block content %}
+  <p class="crumb"><a href="/t/{{ t.slug }}">← {{ 'Standings' if t.status == 'started' else 'Tournaments' }}</a></p>
+  <h1>{{ t.name }}</h1>
+  <p class="meta">{{ long_date(t.date) }} · {{ status(t) }}</p>
+
+  {% if t.status == 'setup' %}
+    <section class="card stack" aria-labelledby="preview-heading">
+      <h2 id="preview-heading">Schedule preview</h2>
+      <ul class="plain facts">
+        <li>{{ summary.players }} players on {{ summary.courts_used }} court{{ 's' if summary.courts_used != 1 }}{% if summary.courts_used < t.num_courts %} (only {{ summary.courts_used }} of {{ t.num_courts }} needed){% endif %}, {{ t.num_rounds }} rounds.</li>
+        {% if summary.sitting %}
+          {% set sits = quality.sit_outs.values()|list %}
+          <li>{{ summary.sitting }} sit{{ 's' if summary.sitting == 1 }} out each round. Each player sits out
+            {% if sits|min == sits|max %}{{ sits|min }}{% else %}{{ sits|min }}–{{ sits|max }}{% endif %}
+            round{{ 's' if sits|max != 1 }}, never two in a row.</li>
+          <li>Ranked by <strong>average points per game</strong>, so sitting out doesn't cost anyone.</li>
+        {% else %}
+          <li>Everyone plays every round. Ranked by <strong>total points</strong>.</li>
+        {% endif %}
+        {% if quality.max_partner <= 1 %}
+          <li>Nobody partners the same person twice.</li>
+        {% else %}
+          <li>{{ quality.repeat_partner_pairs }} pair{{ 's' if quality.repeat_partner_pairs != 1 }} partner more than once{% if summary.repeats_unavoidable %} — unavoidable with this many rounds{% endif %}.</li>
+        {% endif %}
+        <li>No two players face each other more than {{ quality.max_opponent }} time{{ 's' if quality.max_opponent != 1 }}.</li>
+      </ul>
+      <form method="post" action="/t/{{ t.slug }}/start">
+        <button class="primary big">Start tournament</button>
+      </form>
+      <div class="row">
+        <form method="post" action="/t/{{ t.slug }}/reshuffle" data-busy="Shuffling…">
+          <button>Shuffle again</button>
+        </form>
+        <form method="post" action="/t/{{ t.slug }}/delete" data-confirm="Delete {{ t.name }}?">
+          <button class="danger">Delete</button>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+
+  {{ highlight_picker(t) }}
+
+  {% for r in t.rounds %}
+    <section class="round-block" aria-labelledby="r{{ r.number }}">
+      <h2 id="r{{ r.number }}">
+        {% if t.status == 'started' %}<a href="/t/{{ t.slug }}/round/{{ r.number }}">Round {{ r.number }}</a>{% else %}Round {{ r.number }}{% endif %}
+        {% if t.status == 'started' and r.complete %}<span class="badge final">Done</span>{% endif %}
+      </h2>
+      <ol class="plain games">
+        {% for m in r.matches %}
+          <li>
+            <span class="court-no">Court {{ m.court }}</span>
+            <span class="matchup">
+              {{ team(m.a1, m.a2) }}
+              {% if m.scored %}<span class="score">{{ m.score_a }}–{{ m.score_b }}</span>{% else %}<span class="vs">vs</span>{% endif %}
+              {{ team(m.b1, m.b2) }}
+            </span>
+          </li>
+        {% endfor %}
+      </ol>
+      {% if r.sitting_out %}
+        <p class="sitting">Sitting out:
+          {% for p in r.sitting_out %}<span data-pid="{{ p.id }}">{{ p.name }}</span>{{ ', ' if not loop.last }}{% endfor %}
+        </p>
+      {% endif %}
+    </section>
+  {% endfor %}
+{% endblock %}

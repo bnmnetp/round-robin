@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from rr!")
+"""Round robin pickleball tournament manager."""

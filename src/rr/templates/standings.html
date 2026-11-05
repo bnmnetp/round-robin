@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% from "macros.html" import status, rank, long_date, highlight_picker %}
+{% block title %}{{ t.name }} · Round Robin{% endblock %}
+{% block content %}
+  <h1>{{ t.name }}</h1>
+  <p class="meta">{{ long_date(t.date) }} · {{ status(t) }}</p>
+
+  {% set cur = t.current_round %}
+  {% if organizer and cur %}
+    <a class="button primary big" href="/t/{{ t.slug }}/round/{{ cur.number }}">
+      {{ 'Enter' if cur.reported == 0 else 'Finish' }} round {{ cur.number }} scores
+    </a>
+  {% endif %}
+
+  <section aria-labelledby="standings-heading">
+    <h2 id="standings-heading">
+      {% if t.finished %}Final standings
+      {% elif t.rounds_complete == 0 %}Standings
+      {% else %}After round {{ t.rounds_complete }}{% endif %}
+    </h2>
+    <p class="hint">
+      {% if average %}Ranked by average points per game, because some players sit out.
+      {% else %}Ranked by total points.{% endif %}
+      {% if cur and cur.reported %}Includes {{ cur.reported }} of {{ cur.matches|length }} games from round {{ cur.number }}.{% endif %}
+      {% if average and rows and rows[-1][0].rank is none %}Players who haven't played yet are listed last.{% endif %}
+    </p>
+    <table class="standings">
+      <thead>
+        <tr>
+          <th scope="col" class="num">#</th>
+          <th scope="col">Player</th>
+          {% if average %}<th scope="col" class="num">Avg</th>{% endif %}
+          <th scope="col" class="num">Pts</th>
+          <th scope="col" class="num"><abbr title="Games played">G</abbr></th>
+          <th scope="col" class="num"><abbr title="Wins">W</abbr></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row, p in rows %}
+          <tr data-pid="{{ p.id }}" class="{{ 'podium' if t.finished and row.rank <= 3 }}">
+            <td class="num">{{ rank(row) }}</td>
+            <th scope="row">{{ p.name }}</th>
+            {% if average %}<td class="num strong">{{ row.average|one_decimal if row.games else '—' }}</td>{% endif %}
+            <td class="num {{ 'strong' if not average }}">{{ row.points }}</td>
+            <td class="num">{{ row.games }}</td>
+            <td class="num">{{ row.wins }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <div class="row">
+    <a class="button" href="/t/{{ t.slug }}/schedule">Full schedule</a>
+    {% if cur and not organizer %}<a class="button" href="/t/{{ t.slug }}/round/{{ cur.number }}">Round {{ cur.number }}</a>{% endif %}
+  </div>
+
+  {{ highlight_picker(t) }}
+
+  {% if organizer %}
+    <details class="card share">
+      <summary>Share with players</summary>
+      <p>Anyone with this link can follow the standings and schedule. They can't change anything.</p>
+      <p class="row"><input readonly value="{{ public_url }}" aria-label="Public link" class="grow" id="public-url">
+        <button type="button" data-copy="#public-url">Copy</button></p>
+      <div class="qr">{{ qr|safe }}</div>
+    </details>
+    <form method="post" action="/t/{{ t.slug }}/delete" data-confirm="Delete {{ t.name }} and all its scores?" class="danger-zone">
+      <button class="danger small">Delete tournament</button>
+    </form>
+  {% endif %}
+{% endblock %}

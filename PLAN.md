@@ -153,8 +153,7 @@ hover. Use Safari's safe-area insets so nothing hides behind the notch or home b
 4. **Round** (`/t/{id}/round/{n}`): one card per court, for example "Court 1 — Ann &
    Bob vs Cy & Di". Each team's score field has −/+ buttons and is limited to 0–11, with
    a sit-out list below. Each court saves on its own, since games finish at different
-   times. **Finish round** becomes active once every court has a score, and leads to
-   standings.
+   times. Saving the round's last court leads to standings.
 5. **Standings** (`/t/{id}/standings`, public): rank, name, points or average, games,
    wins. Organizers also see a **Next round** button. When the last round is scored,
    the page shows "Final" and gets a print/share-friendly layout.
@@ -165,15 +164,29 @@ hover. Use Safari's safe-area insets so nothing hides behind the notch or home b
 
 ## Build order
 
-1. Project skeleton: uv, FastAPI, base template with mobile CSS, SQLite models, pytest.
-2. **Scheduler + tests.**
-3. Standings/ranking module + tests (total vs average mode, shared ranks, tied games).
-4. Organizer login.
-5. Players page + CSV/paste import (+ tests for messy input: header or no header, extra
-   whitespace, blank lines, duplicate emails).
-6. Tournament setup → schedule preview → round/score entry → standings → final.
-7. Public schedule/standings links, and score corrections.
-8. Dockerfile, README, deploy. Then try the full flow on an actual iPhone.
+All built (2026-11-05), except trying it on a real iPhone and the deploy itself.
+
+1. ✅ Project skeleton.
+2. ✅ Scheduler + tests.
+3. ✅ Standings/ranking + tests.
+4. ✅ Organizer login.
+5. ✅ Players page + CSV/paste import + tests.
+6. ✅ Tournament setup → schedule preview → score entry → standings → final.
+7. ✅ Public schedule/standings links, share QR code, score corrections.
+8. ✅ Dockerfile + README. ⬜ Deploy. ⬜ Try the full flow on an actual iPhone.
+
+### Changes from the plan while building
+
+- **No "Finish round" button.** A round is complete when its last court is
+  saved, and that save goes straight to the standings. One less tap, and nothing
+  to forget.
+- **Unranked until they've played.** In average mode, someone who sat out the only
+  round so far has no average. They show "—" at the bottom instead of being
+  ranked last on 0.0.
+- **"Highlight a player"** on the schedule, round and standings pages. A player
+  picks their own name once (remembered on their phone) and sees which court
+  they're on.
+- **Clear a score** by emptying both boxes and saving.
 
 ## Remaining question
 

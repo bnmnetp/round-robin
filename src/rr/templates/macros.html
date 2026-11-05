@@ -1,0 +1,23 @@
+{% macro status(t) -%}
+  {%- if t.status == 'setup' -%}<span class="badge muted">Setting up</span>
+  {%- elif t.finished -%}<span class="badge final">Final</span>
+  {%- else -%}<span class="badge live">Round {{ t.current_round.number }} of {{ t.num_rounds }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro team(a, b) -%}
+  <span class="team-names"><span data-pid="{{ a.id }}">{{ a.name }}</span><span data-pid="{{ b.id }}">{{ b.name }}</span></span>
+{%- endmacro %}
+
+{% macro rank(row) -%}{% if row.rank is none %}—{% else %}{{ 'T' if row.tied }}{{ row.rank }}{% endif %}{%- endmacro %}
+
+{% macro long_date(d) -%}{{ d.strftime('%A, %B') }} {{ d.day }}, {{ d.year }}{%- endmacro %}
+
+{% macro highlight_picker(t) -%}
+  <label class="highlight-picker">Highlight a player
+    <select data-highlight="{{ t.slug }}">
+      <option value="">—</option>
+      {% for p in t.players %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+    </select>
+  </label>
+{%- endmacro %}

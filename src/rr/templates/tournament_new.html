@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}New tournament · Round Robin{% endblock %}
+{% block content %}
+  <h1>New tournament</h1>
+  <form method="post" action="/tournaments" class="stack" id="new-tournament">
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <div class="card stack">
+      <label>Name <input name="name" value="{{ form.name }}" required></label>
+      <label>Date <input type="date" name="date" value="{{ form.date }}" required></label>
+      <div class="row two">
+        <label>Courts
+          <span class="stepper">
+            <button type="button" data-step="-1" data-target="courts" aria-label="Fewer courts">−</button>
+            <input id="courts" name="courts" value="{{ form.courts }}" inputmode="numeric" pattern="[0-9]*" data-min="1" data-max="{{ max_courts }}" required>
+            <button type="button" data-step="1" data-target="courts" aria-label="More courts">+</button>
+          </span>
+        </label>
+        <label>Rounds
+          <span class="stepper">
+            <button type="button" data-step="-1" data-target="rounds" aria-label="Fewer rounds">−</button>
+            <input id="rounds" name="rounds" value="{{ form.rounds }}" inputmode="numeric" pattern="[0-9]*" data-min="1" data-max="{{ max_rounds }}" required>
+            <button type="button" data-step="1" data-target="rounds" aria-label="More rounds">+</button>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <fieldset class="card">
+      <legend>Who's playing today?</legend>
+      {% if players %}
+        <div class="row">
+          <input type="search" class="filter grow" placeholder="Find a player" data-filter="#picker label" aria-label="Find a player">
+          <button type="button" class="small" data-check="#picker" data-value="1">All</button>
+          <button type="button" class="small" data-check="#picker" data-value="0">None</button>
+        </div>
+        <div class="picker" id="picker">
+          {% for p in players %}
+            <label class="check" data-name="{{ p.name|lower }}">
+              <input type="checkbox" name="players" value="{{ p.id }}" {{ 'checked' if p.id in form.players }}>
+              <span>{{ p.name }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty">No active players. <a href="/players">Add some first.</a></p>
+      {% endif %}
+    </fieldset>
+
+    <div class="summary-bar">
+      <p id="summary" aria-live="polite">Pick at least 4 players.</p>
+      <button class="primary big" id="make-schedule">Make schedule</button>
+    </div>
+  </form>
+{% endblock %}

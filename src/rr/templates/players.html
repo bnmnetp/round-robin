@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Players · Round Robin{% endblock %}
+{% block content %}
+  <h1>Players</h1>
+
+  <form method="post" action="/players" class="card stack">
+    <h2>Add a player</h2>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <label>Name <input name="name" value="{{ form.name if form else '' }}" required autocomplete="off" autocapitalize="words"></label>
+    <label>Email <span class="hint">optional</span>
+      <input type="email" name="email" value="{{ form.email if form else '' }}" autocomplete="off" autocapitalize="off">
+    </label>
+    <div class="row">
+      <button class="primary">Add</button>
+      <a class="button" href="/players/import">Import a list…</a>
+    </div>
+  </form>
+
+  {% set active = players|selectattr('active')|list %}
+  {% set inactive = players|rejectattr('active')|list %}
+
+  {% if players %}
+    <input type="search" class="filter" placeholder="Find a player" data-filter="#player-list li" aria-label="Find a player">
+  {% endif %}
+  <ul class="list" id="player-list">
+    {% for p in active %}
+      <li data-name="{{ p.name|lower }} {{ (p.email or '')|lower }}">
+        <div class="grow">
+          <div>{{ p.name }}</div>
+          {% if p.email %}<div class="hint">{{ p.email }}</div>{% endif %}
+        </div>
+        <a class="button small" href="/players/{{ p.id }}/edit">Edit</a>
+        <form method="post" action="/players/{{ p.id }}/active">
+          <input type="hidden" name="active" value="false">
+          <button class="small" aria-label="Deactivate {{ p.name }}">Deactivate</button>
+        </form>
+      </li>
+    {% endfor %}
+    {% if inactive %}
+      <li class="list-heading">Inactive <span class="hint">hidden when picking players</span></li>
+      {% for p in inactive %}
+        <li class="inactive" data-name="{{ p.name|lower }} {{ (p.email or '')|lower }}">
+          <div class="grow">
+            <div>{{ p.name }}</div>
+            {% if p.email %}<div class="hint">{{ p.email }}</div>{% endif %}
+          </div>
+          <a class="button small" href="/players/{{ p.id }}/edit">Edit</a>
+          <form method="post" action="/players/{{ p.id }}/active">
+            <input type="hidden" name="active" value="true">
+            <button class="small" aria-label="Reactivate {{ p.name }}">Reactivate</button>
+          </form>
+        </li>
+      {% endfor %}
+    {% endif %}
+  </ul>
+  {% if not players %}<p class="empty">No players yet. Add them one at a time or import a list.</p>{% endif %}
+{% endblock %}

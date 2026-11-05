@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ player.name }} · Round Robin{% endblock %}
+{% block content %}
+  <p class="crumb"><a href="/players">← Players</a></p>
+  <h1>Edit player</h1>
+  <form method="post" action="/players/{{ player.id }}/edit" class="card stack narrow">
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <label>Name <input name="name" value="{{ form.name }}" required autocapitalize="words"></label>
+    <label>Email <span class="hint">optional</span>
+      <input type="email" name="email" value="{{ form.email }}" autocapitalize="off">
+    </label>
+    <button class="primary big">Save</button>
+  </form>
+{% endblock %}

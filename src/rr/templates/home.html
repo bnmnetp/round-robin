@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "macros.html" import status, long_date %}
+{% block content %}
+  {% if organizer %}
+    <div class="actions">
+      <a class="button primary big" href="/tournaments/new">New tournament</a>
+    </div>
+  {% endif %}
+  <h1>Tournaments</h1>
+  {% if tournaments %}
+    <ul class="cards">
+      {% for t in tournaments %}
+        <li>
+          <a class="card link-card" href="/t/{{ t.slug }}">
+            <span class="card-title">{{ t.name }}</span>
+            <span class="card-meta">{{ long_date(t.date) }} · {{ t.players|length }} players</span>
+            {{ status(t) }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">
+      No tournaments yet.
+      {% if organizer %}Add your <a href="/players">players</a>, then start a new tournament.{% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

@@ -37,6 +37,25 @@ Open <http://localhost:8000>, tap **Organizer**, and log in.
 
 ## Deploy
 
+`deploy/` runs the app and Caddy (automatic HTTPS) with Docker Compose on a
+small Ubuntu server. It currently runs at pickle.millercabin.com.
+
+```bash
+# Once, on a fresh server whose DNS name already points at it:
+ssh root@HOST 'sh -s -- DOMAIN' < deploy/setup-server.sh   # prints the organizer password
+
+# Every deploy (ships the committed HEAD; the database survives):
+deploy/deploy.sh root@HOST
+```
+
+The settings live in `/opt/rr/.env` on the server. After editing them, run
+`cd /opt/rr/app/deploy && docker compose up -d`.
+
+Back up the database on the server with
+`sqlite3 /var/lib/docker/volumes/rr_data/_data/rr.db ".backup /root/rr-backup.db"`.
+
+### Without the scripts
+
 The app is one container plus one SQLite file. Put it behind a proxy that
 terminates HTTPS:
 

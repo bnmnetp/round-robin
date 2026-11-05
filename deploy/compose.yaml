@@ -1,0 +1,30 @@
+# Runs on the server from /opt/rr/app/deploy. deploy.sh links .env here.
+name: rr
+
+services:
+  app:
+    build: ..
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - data:/data
+
+  # Caddy gets and renews the HTTPS certificate for RR_DOMAIN.
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      RR_DOMAIN: ${RR_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  data:
+  caddy_data:
+  caddy_config:

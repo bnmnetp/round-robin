@@ -14,3 +14,4 @@ wheels/
 *.db-shm
 *.db-wal
 .pytest_cache/
+deploy/.env
